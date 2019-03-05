@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Coding Dojo Wall</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<style>
+    * {
+        margin: 0px;
+        padding: 0px;
+    }
+    .contain {
+        width: 90%;
+        margin: 2.5% auto;
+    }
+    .message {
+        margin-left: 2.5%;
+    }
+    .comment {
+        margin-left: 5%;
+        font-size: 90%;
+    }
+</style>
+<body>
+
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand">Coding Dojo Wall</a>
+        <div class="form-inline">
+            <a class="navbar-brand mr-sm-2">Welcome {{request.session.name}}!</a>
+            <a href='/logout' class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</a>
+        </div>
+    </nav>
+    <div class="contain">
+        {% if messages %}
+            <ul>
+            {%for message in messages %}
+                {% if message.tags == 'msg error' or 'cmt error'%}
+                <li style="color: red;">{{message}}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+        <form action="/post_message" method="POST">
+            <div class="form-group">
+                {% csrf_token %}
+                <label>Post a Message</label>
+                <textarea class="form-control" name="msg" rows="5"></textarea>
+            </div>
+            <input type="submit" class="btn btn-primary mb-2" value="Post Message" style="float: right;">
+        </form>
+        {% for m in message_posts reversed %}
+        <h5>{{m.user_id.first_name}} {{m.user_id.last_name}} {{m.created_at}}</h5>
+        <p class="message">{{m.message}}</p>
+        <div class="comment">
+        {% for c in comments %}
+        {% if c.message_id.id == m.id %}
+            <h6>{{c.user_id.first_name}} {{c.user_id.last_name}} {{c.created_at}}</h6>
+            <p>{{c.comment}}</p>
+        {% endif %}
+        {% endfor %}
+        <form action="/post_comment" method="POST">
+            <div class="form-group">
+                {% csrf_token %}
+                <textarea class="form-control" name="cmt" rows="2"></textarea>
+                <input type="hidden" name='mes' value="{{m.id}}">
+            </div>
+            <input type="submit" class="btn btn-success btn-sm" value="Post Comment" style="float: right;">
+        </form>
+        </div>
+        {% endfor %}
+    </div>
+</body>
